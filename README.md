@@ -1,6 +1,6 @@
 This python script converts a markdown file given on the command line into a TeX file utilizing the GNU Texinfo set of macros.
 
-NOTE: This is a work in progress; feel free to submit any pull requests of any changes that you have implemented. [Github Repository](https://www.github.com/user/LensPlaysGames/markdown2tex)
+NOTE: This is a work in progress; feel free to submit any pull requests of any changes that you have implemented. [Github Repository](https://www.github.com/LensPlaysGames/markdown2tex)
 
 # Dependencies
 All of the dependencies for this program are free software (open source).
@@ -23,7 +23,7 @@ Any subsequent `####` will be subsubsections of the most recently declared subse
 
 If, for example, a subsubsection is declared without a parent subsection, GNU Texinfo will give a warning about having to "raise" it up, but in the end everything will still work.
 
-If the chapter/section/subsection/subsubsection structure is confusing, look into the `info` pages of `info` itself, or even `texinfo`.
+If the chapter/section/subsection/subsubsection structure is confusing, look into the `info` pages of `texinfo`, or even `info` itself.
 
 This document is also an example of what this parser can understand, and will be what we will be converting as our example in the next section.
 
@@ -90,6 +90,6 @@ The following is a link to the Github Repository of this program.
 
 Visit there and click that star button, if you wish :^)
 
-[Github Repository](https://www.github.com/user/LensPlaysGames/markdown2tex)
+[Github Repository](https://www.github.com/LensPlaysGames/markdown2tex)
 
 
