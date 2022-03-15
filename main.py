@@ -3,6 +3,8 @@ from re import finditer, search
 from sys import argv
 
 # TODO:
+# |-- Ignore single end of line, as markdown does
+# |-- Parse markdown tables into GNU Texinfo multitables
 # `-- Implement '\' end of line (hide in TeX output)
 
 def print_usage():
