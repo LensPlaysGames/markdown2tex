@@ -27,40 +27,37 @@ def print_usage():
 def parse_headers(src, inline):
     lines = src.split('\n')
     for i in range(len(lines)):
-        line = lines[i]
-        if len(line) < 2:
+        if len(lines[i]) < 2:
             continue
 
         count = 0
-        while (line[count] == '#'):
+        while (lines[i][count] == '#'):
             count += 1
 
         if count == 0:
             continue
 
         if count > 4:
-            lines[i] = line[count+1:]
+            lines[i] = lines[i][count+1:]
             continue
         
-        name = line[count:]
+        name = lines[i][count:]
 
         # Always specify a new node for each chapter,
         # but do not for any other section if inline is specified.
         if count == 1 or not inline:
-            line = "@node" + name + '\n'
+            lines[i] = "@node" + name + '\n'
         else:
-            line = ""
+            lines[i] = ""
 
         if count == 1:
-            line += "@chapter" + name
+            lines[i] += "@chapter" + name
         elif count == 2:
-            line += "@section" + name
+            lines[i] += "@section" + name
         elif count == 3:
-            line += "@subsection" + name
+            lines[i] += "@subsection" + name
         elif count == 4:
-            line += "@subsubsection" + name
-
-        lines[i] = line
+            lines[i] += "@subsubsection" + name
 
     return '\n'.join(lines)
 
@@ -69,30 +66,25 @@ def parse_bulleted_lists(src):
     lines = src.split('\n')
     is_list = False
     for i in range(len(lines)):
-        line = lines[i]
-        if len(line) < 2:
+        if len(lines[i]) < 2:
             if is_list:
-                lines[i] = "@end itemize\n" + line
+                lines[i] = "@end itemize\n" + lines[i]
                 is_list = False
             continue
 
         # Detect all of the entries within a list.
         if is_list:
-            if line.startswith("- ") or line.startswith("* "):
-                line = "@item\n" + line[2:]
+            if lines[i].startswith("- ") or lines[i].startswith("* "):
+                lines[i] = "@item\n" + lines[i][2:]
             else:
-                line = "@end itemize\n" + line
+                lines[i] = "@end itemize\n" + lines[i]
                 is_list = False
-
-            lines[i] = line
             continue
 
         # Detect the start of a list.
-        if line.startswith("- "):
-            line = "@itemize\n@item\n" + line[2:]
+        if lines[i].startswith("- "):
+            lines[i] = "@itemize\n@item\n" + lines[i][2:]
             is_list = True
-            
-        lines[i] = line
 
     return '\n'.join(lines)
 
@@ -103,31 +95,26 @@ def parse_enumerated_lists(src):
     lines = src.split('\n')
     is_list = False
     for i in range(len(lines)):
-        line = lines[i]
         # Minimum length: "1. a"
-        if len(line) < 4:
+        if len(lines[i]) < 4:
             if is_list:
-                lines[i] = "@end enumerate\n" + line
+                lines[i] = "@end enumerate\n" + lines[i]
                 is_list = False
             continue
 
         # Detect all of the entries within a list.
         if is_list:
-            if line[0].isdigit() and line[1] == '.' and line[2] == ' ':
-                line = "@item\n" + line[3:]
+            if lines[i][0].isdigit() and lines[i][1] == '.' and lines[i][2] == ' ':
+                lines[i] = "@item\n" + lines[i][3:]
             else:
-                line = "@end enumerate\n" + line
+                lines[i] = "@end enumerate\n" + lines[i]
                 is_list = False
-
-            lines[i] = line
             continue
 
         # Detect the start of a list.
-        if line[0].isdigit() and line[1] == '.' and line[2] == ' ':
-            line = "@enumerate\n@item\n" + line[3:]
+        if lines[i][0].isdigit() and lines[i][1] == '.' and lines[i][2] == ' ':
+            lines[i] = "@enumerate\n@item\n" + lines[i][3:]
             is_list = True
-            
-        lines[i] = line
 
     return '\n'.join(lines)
 
@@ -144,16 +131,13 @@ def parse_code(src):
     lines = src.split('\n')
     is_list = False
     for i in range(len(lines)):
-        line = lines[i]
         # Minimum length: "` `"
-        if len(line) < 3:
+        if len(lines[i]) < 3:
             continue
 
-        code_in_quotes = finditer(r'`.+?`', line)
+        code_in_quotes = finditer(r'`.+?`', lines[i])
         for code in code_in_quotes:
-            line = line.replace(code.group(), "@code{" + code.group()[1:-1] + "}")
-
-        lines[i] = line
+            lines[i] = lines[i].replace(code.group(), "@code{" + code.group()[1:-1] + "}")
 
     return '\n'.join(lines)
 
@@ -162,18 +146,15 @@ def parse_images(src):
     lines = src.split('\n')
     is_list = False
     for i in range(len(lines)):
-        line = lines[i]
         # Minimum length: "![a](b)"
-        if len(line) < 7:
+        if len(lines[i]) < 7:
             continue
 
-        images = finditer(r'!\[(.*?)\] *\((.*?)\)', line)
+        images = finditer(r'!\[(.*?)\] *\((.*?)\)', lines[i])
         for image in images:
             alt_text, link = image.groups()
             filename, extension = link.rsplit('.', 1)
-            line = line.replace(image.group(), "@image{" + filename + ",,," + alt_text + ",." + extension + "}")
-
-        lines[i] = line
+            lines[i] = lines[i].replace(image.group(), "@image{" + filename + ",,," + alt_text + ",." + extension + "}")
 
     return '\n'.join(lines)
 
