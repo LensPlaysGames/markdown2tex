@@ -186,6 +186,91 @@ def parse_links(src):
     return '\n'.join(lines)
 
 
+def parse_bold(src):
+    lines = src.split('\n')
+    is_list = False
+    for i in range(len(lines)):
+        # Minimum length: "**a**"
+        if len(lines[i]) < 5:
+            continue
+
+        bold_text = finditer(r'\*\*.*\*\*', lines[i])
+        for it in bold_text:
+            lines[i] = lines[i].replace(it.group(), "@strong{" + it.group()[2:-2] + "}")
+
+    return '\n'.join(lines)
+
+
+def parse_italics(src):
+    lines = src.split('\n')
+    is_list = False
+    for i in range(len(lines)):
+        # Minimum length: "*a*"
+        if len(lines[i]) < 3:
+            continue
+
+        italic_text = finditer(r'\*.*\*', lines[i])
+        for it in italic_text:
+            lines[i] = lines[i].replace(it.group(), "@emph{" + it.group()[1:-1] + "}")
+
+    return '\n'.join(lines)
+
+
+def parse_escapes(src):
+    lines = src.split('\n')
+    is_list = False
+    for i in range(len(lines)):
+        # Minimum length: "\a"
+        if len(lines[i]) < 2:
+            continue
+
+        
+        # Parse markdown escaped characters
+        escaped_characters = finditer(r'\\.', lines[i])
+        for it in escaped_characters:
+            character = it.group()[1]
+            # The following characters must be escaped in markdown but not Texinfo
+            if character == '\\' \
+            or character == '`' \
+            or character == '*' \
+            or character == '_' \
+            or character == '[' \
+            or character == ']' \
+            or character == '<' \
+            or character == '>' \
+            or character == '(' \
+            or character == ')' \
+            or character == '#' \
+            or character == '+' \
+            or character == '-' \
+            or character == '.' \
+            or character == '!' \
+            or character == '|':
+                lines[i] = lines[i].replace(it.group(), character)
+
+            # The following characters must be escaped in markdown as well as Texinfo
+            if character == '{' \
+            or character == '}':
+                lines[i] = lines[i].replace(it.group(), '@' + character)
+
+        # Parse characters that must be escaped
+#        characters_to_escape = finditer(r'[@]')
+
+    return '\n'.join(lines)
+
+
+def parse_markdown(src, inline):
+    out = parse_headers(src, inline)
+    out = parse_bold(out)
+    out = parse_italics(out)
+    out = parse_code(out)
+    out = parse_lists(out)
+    out = parse_images(out)
+    out = parse_links(out)
+    out = parse_escapes(out)
+    return out
+
+
 def main():
     argc = len(argv)
     if argc < 2:
@@ -244,11 +329,7 @@ def main():
     with open(file_path) as markdown:
         with open("template.tex") as template:
             md = markdown.read()
-            md = parse_headers(md, inline)
-            md = parse_lists(md)
-            md = parse_code(md)
-            md = parse_images(md)
-            md = parse_links(md)
+            md = parse_markdown(md, inline)
             tex = template.read()
             tex = tex.replace("$${{TITLE}}$$", title)
             tex = tex.replace("$${{CONTENTS}}$$", md)

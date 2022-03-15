@@ -1,4 +1,4 @@
-This python script converts a markdown file given on the command line into a TeX file utilizing the GNU Texinfo set of macros.
+This python script converts a markdown file given on the command line into a TeX file utilizing the GNU Texinfo set of macros. GNU Texinfo can then convert that source file into HTML, PDF, XML, and more formats.
 
 NOTE: This is a work in progress; feel free to submit any pull requests of any changes that you have implemented. [Github Repository](https://www.github.com/LensPlaysGames/markdown2tex)
 
@@ -13,6 +13,8 @@ NOTE: On Windows, depending on what version of GNU Texinfo you have, you may get
 # Conversion
 
 ## What is a Valid Markdown File to this Parser?
+For a (more) comprehensive outline of the markdown features supported by this converter, see the "Capabilities" chapter.
+
 A `#` at the beginning of a line indicates that a new chapter is started.
 
 Any subsequent `##` will be sections of the most recently decalred chapter.
@@ -62,9 +64,57 @@ One or up to four `#` character(s) at the beginning of a line will create a new 
 
 
 ### Emphasizing Text
+Text may be differentiated from the text around it by emphasizing it (usually italicized in final output). To emphasize text in markdown, wrap it in the '\*' character.
+
+*I've been emphasized :^)*
+
+Important text may be emboldened, or strengthened, by wrapping it in two '\*' characters.
+
+**I am emboldened!**
+
 Code may be represented in a monospace font by wrapping it in the '\`' backtick character.
 
 `This is an example of a simple code block`
+
+### Escaping Characters
+Some characters are escapable in markdown, and that holds true for this converter as well.
+
+\\ Backslash
+
+\` Backtick
+
+\* Asterisk
+
+\_ Underscore
+
+\{ Open Brace
+
+\} Close Brace
+
+\[ Open Bracket
+
+\] Close Bracket
+
+\< Open Angle Bracket
+
+\> Close Angle Bracket
+
+\( Open Parenthesis
+
+\) Close Parenthesis
+
+\# Hash (Pound)
+
+\+ Plus
+
+\- Minus (En-dash)
+
+\. Period (Dot)
+
+\! Exclamation Point
+
+\| Pipe
+
 
 ## Lists
 Nested lists are not yet supported, however regular old lists and numbered lists (enumerations) are supported.
@@ -80,11 +130,6 @@ For an example of a numbered list, here are the steps to get back to the "Capabi
 
 ## Cross-References
 
-### Images
-The following is an image; on some representations, you'll only see the alternative text, while on others, you will see the image instead.
-
-![A small icon of the letter M](M.png)
-
 ### URLs
 The following is a link to the Github Repository of this program.
 
@@ -92,4 +137,7 @@ Visit there and click that star button, if you wish :^)
 
 [Github Repository](https://www.github.com/LensPlaysGames/markdown2tex)
 
+### Images
+The following is an image; on some representations, you'll only see the alternative text, while on others, you will see the image instead.
 
+![A small icon of the letter M](M.png)
