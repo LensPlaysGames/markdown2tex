@@ -8,6 +8,8 @@ All of the dependencies for this program are free software (open source).
 - [Python](https://www.python.org/)
 - [GNU Texinfo](https://www.gnu.org/software/texinfo/)
 
+NOTE: On Windows, depending on what version of GNU Texinfo you have, you may get lots of errors and it may not work when trying to run `makeinfo`. I recommend WSL. No problems. The script generates everything correctly, but the Windows version of `makeinfo` isn't always robust.
+
 # Conversion
 
 ## What is a Valid Markdown File to this Parser?
