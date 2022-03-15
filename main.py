@@ -78,7 +78,7 @@ def parse_bulleted_lists(src):
 
         # Detect all of the entries within a list.
         if is_list:
-            if line.startswith("- "):
+            if line.startswith("- ") or line.startswith("* "):
                 line = "@item\n" + line[2:]
             else:
                 line = "@end itemize\n" + line
