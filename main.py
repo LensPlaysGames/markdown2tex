@@ -69,6 +69,9 @@ def parse_bulleted_lists(src):
     for i in range(len(lines)):
         line = lines[i]
         if len(line) < 2:
+            if is_list:
+                lines[i] = "@end itemize\n" + line
+                is_list = False
             continue
 
         # Detect all of the entries within a list.
@@ -101,6 +104,9 @@ def parse_enumerated_lists(src):
         line = lines[i]
         # Minimum length: "1. a"
         if len(line) < 4:
+            if is_list:
+                lines[i] = "@end enumerate\n" + line
+                is_list = False
             continue
 
         # Detect all of the entries within a list.
