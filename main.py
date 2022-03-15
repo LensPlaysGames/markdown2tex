@@ -19,7 +19,7 @@ def print_usage():
     print()
     print("Options:")
     print("    -t <title>     -- Specify the title of the Texinfo manual that is generated")
-    print("    -o <path>      -- Specify the filepath where the Texinfo manual will be saved to")
+    print("    -o <path>      -- Specify the file path where the Texinfo manual will be saved to")
     print()
     exit(0)
 
@@ -210,9 +210,9 @@ def main():
     if argc < 2:
         print_usage()
 
-    filepath = ""
+    file_path = ""
     title = ""
-    output_filepath = ""
+    output_file_path = ""
     inline = False
 
     i = 1
@@ -228,37 +228,39 @@ def main():
             title = argv[i]
         elif arg.startswith("-o"):
             if i + 1 >= argc:
-                print("ERROR: Expected an output filepath to be specified after `-o` option.")
+                print("ERROR: Expected an output file path to be specified after `-o` option.")
                 exit(1)
             i += 1
-            output_filepath = argv[i]
+            output_file_path = argv[i]
         elif arg.startswith("-i") or arg.startswith("--inline"):
             inline = True
         else:
-            if not filepath:
-                filepath = arg
+            if not file_path:
+                file_path = arg
             else:
-                print("ERROR: Multiple filepaths specified (command line argument unrecognized)")
+                print("ERROR: Multiple file paths specified (command line argument unrecognized)")
                 exit(1)
 
         i += 1
 
-    if not filepath:
-        print("ERROR: No filepath was given, or was not able to be parsed from the command line arguments given.")
+    if not file_path:
+        print("ERROR: No file path was given, or was not able to be parsed from the command line arguments given.")
         exit(1)
 
-    if not filepath.lower().endswith(".md"):
-        print("ERROR: The path given is not a valid markdown file (wrong extension).")
-        print(" -> ", filepath)
+    if not file_path.lower().endswith(".md"):
+        print("ERROR: The file path given is not a valid markdown file (wrong extension).")
+        print(" -> ", file_path)
         exit(1)
 
     if not title:
-        title = path.basename(filepath)
+        title = path.basename(file_path)
 
-    if not output_filepath:
-        output_filepath = title.lstrip().lower().replace(' ', '_') + ".tex"
+    # If no output file path is specified on the command line, generate one from the title.
+    # Convert to lowercase and replace all spaces with underscores to ensure valid file name.
+    if not output_file_path:
+        output_file_path = title.lstrip().lower().replace(' ', '_') + ".tex"
     
-    with open(filepath) as markdown:
+    with open(file_path) as markdown:
         with open("template.tex") as template:
             md = markdown.read()
             md = parse_headers(md, inline)
@@ -269,7 +271,7 @@ def main():
             tex = template.read()
             tex = tex.replace("$${{TITLE}}$$", title)
             tex = tex.replace("$${{CONTENTS}}$$", md)
-            with open(output_filepath, 'w') as out:
+            with open(output_file_path, 'w') as out:
                 out.write(tex)
 
 
