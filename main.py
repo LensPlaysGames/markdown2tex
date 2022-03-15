@@ -178,23 +178,26 @@ def parse_images(src):
 # NOTE: This function gets confused at images,
 #       so be sure to parse_images() first!
 def parse_links(src):
-    # FIXME: ACTUALLY DO THE THING!
-    return src
-
     lines = src.split('\n')
     is_list = False
     for i in range(len(lines)):
-        line = lines[i]
         # Minimum length: "[a](b)"
-        if len(line) < 6:
+        if len(lines[i]) < 6:
             continue
 
-        links = findall(r'\[(.+?)\] *\((.+?)\)', line)
-        # FIXME: I need some way to
-        for link in links:
-            line = "@html\n" + line.replace(link, "<a href=\"" + link_path + "\">" + link_name + "</a>") + "\n@end html"
+        links = finditer(r'\[(.+?)\] *\((.+?)\)', lines[i])
+        for it in links:
+            name, link = it.groups()
+            if link.startswith('#'):
+                print("WARNING: markdown2tex does not yet support links to anchors")
+                continue
 
-        lines[i] = line
+            replacement = "@url{" + link
+            if name:
+                replacement += ", " + name
+
+            replacement += "}"
+            lines[i] = lines[i].replace(it.group(), replacement)
 
     return '\n'.join(lines)
 
