@@ -50,3 +50,46 @@ To get help with the options and flags that may be specified, use the following 
 `python /path/to/markdown2tex/main.py -h`
 
 This will print out the layout of the command (usage), as well as the flags and options available and a short description of what they do to the standard output.
+
+# Capabilities
+In no particular order, here is an incomprehensive exploration of markdown features that are currently supported by 
+markdown2tex.
+
+## `#` Headers
+One or up to four `#` character(s) at the beginning of a line will create a new chapter, section, subsection, and subsubsection in GNU Texinfo format.
+
+## Text
+
+
+### Emphasizing Text
+Code may be represented in a monospace font by wrapping it in the '\`' backtick character.
+
+`This is an example of a simple code block`
+
+## Lists
+Nested lists are not yet supported, however regular old lists and numbered lists (enumerations) are supported.
+
+For example, here's a list of the lists currently supported:
+- Bulleted Lists
+- Numbered Lists
+
+For an example of a numbered list, here are the steps to get back to the "Capabilities" chapter.
+1. Press the `u` button on the keyboard
+2. ???
+3. Profit!
+
+## Cross-References
+
+### Images
+The following is an image; on some representations, you'll only see the alternative text, while on others, you will see the image instead.
+
+![A small icon of the letter M](M.png)
+
+### URLs
+The following is a link to the Github Repository of this program.
+
+Visit there and click that star button, if you wish :^)
+
+[Github Repository](https://www.github.com/user/LensPlaysGames/markdown2tex)
+
+
