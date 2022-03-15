@@ -1,5 +1,5 @@
 from os import path
-from re import findall, search
+from re import finditer, search
 from sys import argv
 
 # TODO:
@@ -147,9 +147,9 @@ def parse_code(src):
         if len(line) < 3:
             continue
 
-        code_in_quotes = findall(r'`.+?`', line)
-        for str in code_in_quotes:
-            line = line.replace(str, "@code{" + str[1:-1] + "}")
+        code_in_quotes = finditer(r'`.+?`', line)
+        for code in code_in_quotes:
+            line = line.replace(code.group(), "@code{" + code.group()[1:-1] + "}")
 
         lines[i] = line
 
@@ -165,10 +165,11 @@ def parse_images(src):
         if len(line) < 7:
             continue
 
-        images = findall(r'!\[(.*?)\] *\((.*?)\)', line)
+        images = finditer(r'!\[(.*?)\] *\((.*?)\)', line)
         for image in images:
-            image_filepath = search(r'(?<=\()(.*?)(?=[\),\", ])', image)
-            line = line.replace(image, "@image{" + image_filepath + "}")
+            alt_text, link = image.groups()
+            filename, extension = link.rsplit('.', 1)
+            line = line.replace(image.group(), "@image{" + filename + ",,," + alt_text + ",." + extension + "}")
 
         lines[i] = line
 
