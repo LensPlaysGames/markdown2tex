@@ -297,22 +297,7 @@ def parse_italics(src):
     return '\n'.join(lines)
 
 
-def parse_characters_to_escape(src):
-    lines = src.split('\n')
-    for i in range(len(lines)):
-        # Minimum length: "\a"
-        if len(lines[i]) < 2:
-            continue
-
-        # Parse characters that must be escaped
-        characters_to_escape = finditer(r'@', lines[i])
-        for it in characters_to_escape:
-            lines[i] = lines[i].replace(it.group(), '@' + it.group())
-
-    return '\n'.join(lines)
-
-
-def parse_escaped_characters(src):
+def parse_escape_characters(src):
     lines = src.split('\n')
     links = "\\[(.+?)\\] *\\((.+?)\\)"
     code_single = "`.+?`"
@@ -360,7 +345,12 @@ def parse_escaped_characters(src):
                or character == '|':
                 lines[i] = lines[i].replace(it.group(), character)
 
-            # The following characters must be escaped in markdown as well as Texinfo
+            # The following characters need to be escaped in Texinfo but not markdown
+            characters_to_escape = finditer(r'@', lines[i])
+            for it in characters_to_escape:
+                lines[i] = lines[i].replace(it.group(), '@' + it.group())
+
+            # The following characters must be escaped in Texinfo as well as markdown
             if character == '{' \
                or character == '}':
                 lines[i] = lines[i].replace(it.group(), '@' + character)
@@ -383,15 +373,14 @@ def parse_trailing_backslash(src):
 
 def parse_markdown(src, inline):
     out = src
-    out = parse_escaped_characters(out)
-    out = parse_characters_to_escape(out)
     out = parse_trailing_backslash(out)
     out = parse_anchors(out)
     out = parse_headers_new(out, inline)
+    out = parse_lists(out)
+    out = parse_escape_characters(out)
     out = parse_bold(out)
     out = parse_italics(out)
     out = parse_code(out)
-    out = parse_lists(out)
     out = parse_images(out)
     out = parse_links(out)
     return out
