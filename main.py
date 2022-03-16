@@ -342,27 +342,27 @@ def parse_escaped_characters(src):
 
             character = it.group()[1]
             # The following characters must be escaped in markdown but not Texinfo
-            if character == '\\' \
-            or character == '`' \
-            or character == '*' \
-            or character == '_' \
-            or character == '[' \
-            or character == ']' \
-            or character == '<' \
-            or character == '>' \
-            or character == '(' \
-            or character == ')' \
-            or character == '#' \
-            or character == '+' \
-            or character == '-' \
-            or character == '.' \
-            or character == '!' \
-            or character == '|':
+            if character == '\\'   \
+               or character == '`' \
+               or character == '*' \
+               or character == '_' \
+               or character == '[' \
+               or character == ']' \
+               or character == '<' \
+               or character == '>' \
+               or character == '(' \
+               or character == ')' \
+               or character == '#' \
+               or character == '+' \
+               or character == '-' \
+               or character == '.' \
+               or character == '!' \
+               or character == '|':
                 lines[i] = lines[i].replace(it.group(), character)
 
             # The following characters must be escaped in markdown as well as Texinfo
             if character == '{' \
-            or character == '}':
+               or character == '}':
                 lines[i] = lines[i].replace(it.group(), '@' + character)
 
     return '\n'.join(lines)
