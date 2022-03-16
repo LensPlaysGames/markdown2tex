@@ -316,8 +316,8 @@ def parse_escaped_characters(src):
         if len(lines[i]) < 2:
             continue
         
+        # TODO: Figure out how to skip triple backtick code blocks...
         verbatim_texts = finditer(r'' + links
-                                  + '|' + code_triple
                                   + '|' + code_single
                                   , lines[i])
 
@@ -358,8 +358,6 @@ def parse_escaped_characters(src):
             if character == '{' \
             or character == '}':
                 lines[i] = lines[i].replace(it.group(), '@' + character)
-
-            print("  line=" + str(lines[i]))
 
     return '\n'.join(lines)
 
