@@ -3,9 +3,7 @@ from re import finditer, search
 from sys import argv
 
 # TODO:
-# |-- Ignore single end of line, as markdown does
-# |-- Parse markdown tables into GNU Texinfo multitables
-# `-- Implement '\' end of line (hide in TeX output)
+# `-- Parse markdown tables into GNU Texinfo multitables
 
 def print_usage():
     print("Markdown to GNU Texinfo Converter by Rylan `Lens` Kellogg")
@@ -35,7 +33,7 @@ def parse_headers_new(src, inline):
         while (lines[i][count] == '#'):
             count += 1
 
-        if count == 0:
+        if count == 0 or count > 6:
             continue
 
         # Node names must not use periods, commas, or colons, or start with a left parenthesis.
@@ -47,7 +45,7 @@ def parse_headers_new(src, inline):
             name[0] = ' '
 
         if count > hash_count:
-            nest_level += 1
+            nest_level = min(nest_level + 1, 4)
         elif count < hash_count:
             nest_level = max(nest_level - (hash_count - count), 1)
 
@@ -68,6 +66,8 @@ def parse_headers_new(src, inline):
             lines[i] += "@subsection" + name
         elif nest_level == 4:
             lines[i] += "@subsubsection" + name
+        else:
+            print("ERROR: Invalid nest level")
 
     return '\n'.join(lines)
 
