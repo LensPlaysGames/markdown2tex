@@ -297,7 +297,19 @@ def parse_italics(src):
     return '\n'.join(lines)
 
 
-def parse_escape_characters(src):
+def parse_at_characters(src):
+    lines = src.split('\n')
+    links = "\\[(.+?)\\] *\\((.+?)\\)"
+    code_single = "`.+?`"
+
+    for i in range(len(lines)):
+        unescaped_at_characters = finditer(r'@', lines[i])
+        for it in unescaped_at_characters:
+            lines[i] = lines[i].replace(it.group(), '@' + it.group())
+
+    return '\n'.join(lines)
+
+def parse_escaped_characters(src):
     lines = src.split('\n')
     links = "\\[(.+?)\\] *\\((.+?)\\)"
     code_single = "`.+?`"
@@ -345,11 +357,6 @@ def parse_escape_characters(src):
                or character == '|':
                 lines[i] = lines[i].replace(it.group(), character)
 
-            # The following characters need to be escaped in Texinfo but not markdown
-            characters_to_escape = finditer(r'@', lines[i])
-            for it in characters_to_escape:
-                lines[i] = lines[i].replace(it.group(), '@' + it.group())
-
             # The following characters must be escaped in Texinfo as well as markdown
             if character == '{' \
                or character == '}':
@@ -366,18 +373,19 @@ def parse_trailing_backslash(src):
             continue
 
         if lines[i].endswith(" \\"):
-            lines[i] = lines[i][:-2] + '\n'
+            lines[i] = lines[i][:-2] + '\n\n'
         
     return '\n'.join(lines)
 
 
 def parse_markdown(src, inline):
     out = src
+    out = parse_at_characters(out)
     out = parse_trailing_backslash(out)
     out = parse_anchors(out)
     out = parse_headers_new(out, inline)
     out = parse_lists(out)
-    out = parse_escape_characters(out)
+    out = parse_escaped_characters(out)
     out = parse_bold(out)
     out = parse_italics(out)
     out = parse_code(out)
