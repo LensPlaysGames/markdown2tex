@@ -60,6 +60,8 @@ Meaning of `nest_level`:
 - 3 -> Subsection
 - 4 -> Subsubsection
 
+If you use the lines that start with `#` in markdown as anything other than a label for the following chunk of text, you will likely have errors in the generated output structure. Other than that, this parse makes little other assumptions about the input markdown.
+
 ### Text
 
 #### Emphasizing Text
