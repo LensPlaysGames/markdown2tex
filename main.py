@@ -104,6 +104,27 @@ def parse_headers(src, inline):
     return '\n'.join(lines)
 
 
+names_used = set()
+def parse_anchors(src):
+    lines = src.split('\n')
+    for i in range(len(lines)):
+        # Minimum length: "<a></a>"
+        if len(lines[i]) < 7:
+            continue
+
+        anchors = finditer(r'<a[^/].*>.*</a>', lines[i])
+        for anchor in anchors:
+            name = search(r'(name=")(.*)(")', anchor.group())
+            if name.groups()[1]:
+                lines[i] = lines[i].replace(anchor.group(), "")
+                if name.groups()[1] not in names_used:
+                    lines[i] += "\n@anchor{" + name.groups()[1] + "}\n"
+                    names_used.add(name.groups()[1])
+
+                  
+    return '\n'.join(lines)
+
+
 def parse_bulleted_lists(src):
     lines = src.split('\n')
     is_list = False
@@ -225,7 +246,11 @@ def parse_links(src):
         for it in links:
             name, link = it.groups()
             if link.startswith('#'):
-                print("WARNING: markdown2tex does not yet support links to anchors")
+                replacement = "@ref{" + link[1:]
+                if name:
+                    replacement += ",," + name
+                replacement += "}"
+                lines[i] = lines[i].replace(it.group(), replacement)
                 continue
 
             replacement = "@url{" + link
@@ -284,7 +309,6 @@ def parse_characters_to_escape(src):
 def parse_escaped_characters(src):
     lines = src.split('\n')
     links = "\\[(.+?)\\] *\\((.+?)\\)"
-    code_triple = "^```"
     code_single = "`.+?`"
 
     for i in range(len(lines)):
@@ -358,6 +382,7 @@ def parse_markdown(src, inline):
     out = parse_escaped_characters(out)
     out = parse_characters_to_escape(out)
     out = parse_trailing_backslash(out)
+    out = parse_anchors(out)
     out = parse_headers_new(out, inline)
     out = parse_bold(out)
     out = parse_italics(out)
