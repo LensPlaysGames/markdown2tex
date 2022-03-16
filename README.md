@@ -13,21 +13,9 @@ NOTE: On Windows, depending on what version of GNU Texinfo you have, you may get
 ## Conversion
 
 ### What is a Valid Markdown File to this Parser?
-For a (more) comprehensive outline of the markdown features supported by this converter, see the "Capabilities" chapter.
+Technically, all files containing only valid markdown are valid to this parser, but not all features of all markdown syntaxes are supported, and some layouts may not make any sense in the final output.
 
-A `#` at the beginning of a line indicates that a new chapter is started.
-
-Any subsequent `##` will be sections of the most recently decalred chapter.
-
-Any subsequent `###` will be subsections of the most recently declared section. 
-
-Any subsequent `####` will be subsubsections of the most recently declared subsection.
-
-If, for example, a subsubsection is declared without a parent subsection, GNU Texinfo will give a warning about having to "raise" it up, but in the end everything will still work.
-
-If the chapter/section/subsection/subsubsection structure is confusing, look into the `info` pages of `texinfo`, or even `info` itself.
-
-This document is also an example of what this parser can understand, and will be what we will be converting as our example in the next section.
+For a full outline of how the layout of the generated Texinfo source file is determined [the # Headers Section](#hash-headers).
 
 ### Converting This File into an Info Page
 We will first convert this README markdown file into a Texinfo source file. 
@@ -46,6 +34,8 @@ Everything is all generated at this point! Take a look using `info`:
 
 `info -f markdown2tex_converter.info`
 
+Many formats are supported by `makeinfo`, and can be found by invoking the command with the `-h` command line flag.
+
 ### Command Line Flags and Options
 To get help with the options and flags that may be specified, use the following command:
 
@@ -57,8 +47,18 @@ This will print out the layout of the command (usage), as well as the flags and 
 In no particular order, here is an incomprehensive exploration of markdown features that are currently supported by 
 markdown2tex.
 
-### `#` Headers
-One or up to four `#` character(s) at the beginning of a line will create a new chapter, section, subsection, and subsubsection in GNU Texinfo format.
+### `#` Headers <a name="hash-headers"></a>
+Headers are parsed according to the following rules:
+- If no line that starts with leading `#` characters has been found, the first occurence of one such line will set `hash_count` to the amount of hashes present and `nest_level` to `1`, indicating a chapter.
+- If any subsequent line starts with an amount of leading `#` characters that is greater than `hash_count` (the previous header line's amount of leading `#` characters), `nest_level` is increased by `1`, up to a max of `4`. `hash_count` is updated.
+- If any subsequent line starts with an amount of leading `#` characters that is less than `hash_count`, `nest_level` is reduced by the difference in current `hash_count` and previous `hash_count`. `hash_count` is updated.
+- If any subsequent line starts with an amount of leading `#` characters that is equal to `hash_count`, `nest_level` stays the same.
+
+Meaning of `nest_level`:
+- 1 -> Chapter
+- 2 -> Section
+- 3 -> Subsection
+- 4 -> Subsubsection
 
 ### Text
 
