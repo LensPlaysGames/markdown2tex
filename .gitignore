@@ -1,4 +1,5 @@
 *.tex
+*.texi
 *.info
 *.html
 *.pdf
