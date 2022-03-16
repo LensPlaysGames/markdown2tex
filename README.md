@@ -130,9 +130,13 @@ For an example of a numbered list, here are the steps to get back to the "Capabi
 ### Cross-References
 
 #### Anchors
+By inserting an HTML anchor with a name attribute, and linking to it with a markdown-style link syntax, this parser will generate both the anchor and the reference link for Texinfo. This means it will be a valid cross-reference online (via a hyperlink), offline (via an explicitly printed URL), or printed out on paper (with page numbers and everything). 
 
+To correctly link to an anchor on the same page, use a `#` prefix on the value of the name attribute, as is standard in markdown.
 
-#### URLs
+[Here is a link to the next section](#referencing-urls), all about referencing URLs
+
+#### URLs <a name="referencing-urls"></a>
 The following is a link to the Github Repository of this program.
 
 Visit there and click that star button, if you wish :^)
