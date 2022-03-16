@@ -38,7 +38,13 @@ def parse_headers_new(src, inline):
         if count == 0:
             continue
 
+        # Node names must not use periods, commas, or colons, or start with a left parenthesis.
         name = lines[i][count:]
+        name = name.replace(".", " ")
+        name = name.replace(",", " ")
+        name = name.replace(":", " ")
+        if name.startswith('('):
+            name[0] = ' '
 
         if count > hash_count:
             nest_level += 1
