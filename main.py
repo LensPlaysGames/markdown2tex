@@ -447,10 +447,10 @@ def main():
     # If no output file path is specified on the command line, generate one from the title.
     # Convert to lowercase and replace all spaces with underscores to ensure valid file name.
     if not output_file_path:
-        output_file_path = title.lstrip().lower().replace(' ', '_') + ".tex"
+        output_file_path = title.lstrip().lower().replace(' ', '_') + ".texi"
     
     with open(file_path) as markdown:
-        with open("template.tex") as template:
+        with open("template.texi") as template:
             md = markdown.read()
             md = parse_markdown(md, inline)
             tex = template.read()
