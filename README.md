@@ -62,7 +62,6 @@ One or up to four `#` character(s) at the beginning of a line will create a new 
 
 ## Text
 
-
 ### Emphasizing Text
 Text may be differentiated from the text around it by emphasizing it (usually italicized in final output). To emphasize text in markdown, wrap it in the '\*' character.
 

@@ -23,6 +23,48 @@ def print_usage():
     print()
     exit(0)
 
+def parse_headers_new(src, inline):
+    lines = src.split('\n')
+    hash_count = 0
+    nest_level = 0
+    for i in range(len(lines)):
+        if len(lines[i]) < 2:
+            continue
+
+        count = 0
+        while (lines[i][count] == '#'):
+            count += 1
+
+        if count == 0:
+            continue
+
+        name = lines[i][count:]
+
+        if count > hash_count:
+            nest_level += 1
+        elif count < hash_count:
+            nest_level = max(nest_level - (hash_count - count), 1)
+
+        hash_count = count
+
+        # Always specify a new node for each chapter,
+        # but do not for any other section if inline is specified.
+        if nest_level == 1 or not inline:
+            lines[i] = "@node" + name + '\n'
+        else:
+            lines[i] = ""
+
+        if nest_level == 1:
+            lines[i] += "@chapter" + name
+        elif nest_level == 2:
+            lines[i] += "@section" + name
+        elif nest_level == 3:
+            lines[i] += "@subsection" + name
+        elif nest_level == 4:
+            lines[i] += "@subsubsection" + name
+
+    return '\n'.join(lines)
+
     
 def parse_headers(src, inline):
     lines = src.split('\n')
@@ -129,12 +171,24 @@ def parse_lists(src):
 
 def parse_code(src):
     lines = src.split('\n')
-    is_list = False
+    in_block = False
     for i in range(len(lines)):
         # Minimum length: "` `"
         if len(lines[i]) < 3:
             continue
 
+        # Triple backtick code blocks
+        if lines[i].startswith("```"):
+            if in_block:
+                lines[i] = "@end example"
+                in_block = False
+            else:
+                lines[i] = "@example"
+                in_block = True
+            continue
+
+
+        # Single backtick wrapped code segments
         code_in_quotes = finditer(r'`.+?`', lines[i])
         for code in code_in_quotes:
             lines[i] = lines[i].replace(code.group(), "@code{" + code.group()[1:-1] + "}")
@@ -144,7 +198,6 @@ def parse_code(src):
 
 def parse_images(src):
     lines = src.split('\n')
-    is_list = False
     for i in range(len(lines)):
         # Minimum length: "![a](b)"
         if len(lines[i]) < 7:
@@ -163,7 +216,6 @@ def parse_images(src):
 #       so be sure to parse_images() first!
 def parse_links(src):
     lines = src.split('\n')
-    is_list = False
     for i in range(len(lines)):
         # Minimum length: "[a](b)"
         if len(lines[i]) < 6:
@@ -188,7 +240,6 @@ def parse_links(src):
 
 def parse_bold(src):
     lines = src.split('\n')
-    is_list = False
     for i in range(len(lines)):
         # Minimum length: "**a**"
         if len(lines[i]) < 5:
@@ -203,7 +254,6 @@ def parse_bold(src):
 
 def parse_italics(src):
     lines = src.split('\n')
-    is_list = False
     for i in range(len(lines)):
         # Minimum length: "*a*"
         if len(lines[i]) < 3:
@@ -216,18 +266,50 @@ def parse_italics(src):
     return '\n'.join(lines)
 
 
-def parse_escapes(src):
+def parse_characters_to_escape(src):
     lines = src.split('\n')
-    is_list = False
     for i in range(len(lines)):
         # Minimum length: "\a"
         if len(lines[i]) < 2:
             continue
 
+        # Parse characters that must be escaped
+        characters_to_escape = finditer(r'@', lines[i])
+        for it in characters_to_escape:
+            lines[i] = lines[i].replace(it.group(), '@' + it.group())
+
+    return '\n'.join(lines)
+
+
+def parse_escaped_characters(src):
+    lines = src.split('\n')
+    links = "\\[(.+?)\\] *\\((.+?)\\)"
+    code_triple = "^```"
+    code_single = "`.+?`"
+
+    for i in range(len(lines)):
+        # Minimum length: "\a"
+        if len(lines[i]) < 2:
+            continue
         
+        verbatim_texts = finditer(r'' + links
+                                  + '|' + code_triple
+                                  + '|' + code_single
+                                  , lines[i])
+
         # Parse markdown escaped characters
         escaped_characters = finditer(r'\\.', lines[i])
         for it in escaped_characters:
+            skip = False
+            for txt in verbatim_texts:
+                if it.group() in txt.group():
+                    skip = True
+                    break
+
+            if skip:
+                skip = False
+                continue
+
             character = it.group()[1]
             # The following characters must be escaped in markdown but not Texinfo
             if character == '\\' \
@@ -253,21 +335,36 @@ def parse_escapes(src):
             or character == '}':
                 lines[i] = lines[i].replace(it.group(), '@' + character)
 
-        # Parse characters that must be escaped
-#        characters_to_escape = finditer(r'[@]')
+            print("  line=" + str(lines[i]))
 
     return '\n'.join(lines)
 
 
+def parse_trailing_backslash(src):
+    lines = src.split('\n')
+    for i in range(len(lines)):
+        # Minimum length: " \"
+        if len(lines[i]) < 2:
+            continue
+
+        if lines[i].endswith(" \\"):
+            lines[i] = lines[i][:-2] + '\n'
+        
+    return '\n'.join(lines)
+
+
 def parse_markdown(src, inline):
-    out = parse_headers(src, inline)
+    out = src
+    out = parse_escaped_characters(out)
+    out = parse_characters_to_escape(out)
+    out = parse_trailing_backslash(out)
+    out = parse_headers_new(out, inline)
     out = parse_bold(out)
     out = parse_italics(out)
     out = parse_code(out)
     out = parse_lists(out)
     out = parse_images(out)
     out = parse_links(out)
-    out = parse_escapes(out)
     return out
 
 
