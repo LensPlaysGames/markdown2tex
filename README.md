@@ -1,3 +1,4 @@
+# Markdown2Tex
 This python script converts a markdown file given on the command line into a TeX file utilizing the GNU Texinfo set of macros. GNU Texinfo can then convert that source file into HTML, PDF, XML, and more formats.
 
 NOTE: This is a work in progress; feel free to submit any pull requests of any changes that you have implemented. [Github Repository](https://www.github.com/LensPlaysGames/markdown2tex)
@@ -49,7 +50,8 @@ markdown2tex.
 
 ### `#` Headers <a name="hash-headers"></a>
 Headers are parsed according to the following rules:
-- If no line that starts with leading `#` characters has been found, the first occurence of one such line will set `hash_count` to the amount of hashes present and `nest_level` to `1`, indicating a chapter.
+- If the first line of the input file contains a single `#` followed by a space ` `, the text following will be used as the title and not update `hash_count` or `nest_level`.
+- If no line that starts with leading `#` characters has been found (excluding first line with single hash), the first occurence of one such line will set `hash_count` to the amount of hashes present and `nest_level` to `1`, indicating a chapter.
 - If any subsequent line starts with an amount of leading `#` characters that is greater than `hash_count` (the previous header line's amount of leading `#` characters), `nest_level` is increased by `1`, up to a max of `4`. `hash_count` is updated.
 - If any subsequent line starts with an amount of leading `#` characters that is less than `hash_count`, `nest_level` is reduced by the difference in current `hash_count` and previous `hash_count`. `hash_count` is updated.
 - If any subsequent line starts with an amount of leading `#` characters that is equal to `hash_count`, `nest_level` stays the same.
@@ -116,6 +118,10 @@ Some characters are escapable in markdown, and that holds true for this converte
 
 \| Pipe
 
+
+There are also characters that must be escaped in TeX but not markdown, like the `@` symbol.
+
+@ At
 
 ### Lists
 Nested lists are not yet supported, however regular old lists and numbered lists (enumerations) are supported.

@@ -14,6 +14,7 @@ def print_usage():
     print("Flags:")
     print("    -h, --help     -- Show the help dialog in stdout")
     print("    -i, --inline   -- Do not specify new nodes for sections within chapters.")
+    print("    --hide-toc     -- Hide any line that starts with `#` and contains `Table of Contents`.")
     print()
     print("Options:")
     print("    -t <title>     -- Specify the title of the Texinfo manual that is generated")
@@ -21,35 +22,54 @@ def print_usage():
     print()
     exit(0)
 
-def parse_headers_new(src, inline):
+def parse_headers_new(src, title, inline, hide_toc):
     lines = src.split('\n')
-    hash_count = 0
+    within_toc = False
+    prev_hash_count = 0
     nest_level = 0
     for i in range(len(lines)):
+        if i == 0 and lines[0][0] == '#' and lines[0][1] == ' ':
+            title = lines[0][2:]
+            lines[0] = ""
+            continue
+
+        if hide_toc and ("table of contents" in lines[i].lower() \
+                         or "table-of-contents" in lines[i].lower()):
+            lines[i] = ""
+            within_toc = True
+            continue
+
         if len(lines[i]) < 2:
             continue
 
-        count = 0
-        while (lines[i][count] == '#'):
-            count += 1
+        hash_count = 0
+        while lines[i][hash_count] == '#':
+            hash_count += 1
 
-        if count == 0 or count > 6:
+        if hide_toc and within_toc:
+            if hash_count != 0:
+                within_toc = False
+            else:
+                lines[i]= ""
+                continue
+
+        if hash_count == 0 or hash_count > 6:
             continue
 
         # Node names must not use periods, commas, or colons, or start with a left parenthesis.
-        name = lines[i][count:]
+        name = lines[i][hash_count:]
         name = name.replace(".", " ")
         name = name.replace(",", " ")
         name = name.replace(":", " ")
         if name.startswith('('):
             name[0] = ' '
 
-        if count > hash_count:
+        if hash_count > prev_hash_count:
             nest_level = min(nest_level + 1, 4)
-        elif count < hash_count:
-            nest_level = max(nest_level - (hash_count - count), 1)
+        elif hash_count < prev_hash_count:
+            nest_level = max(nest_level - (prev_hash_count - hash_count), 1)
 
-        hash_count = count
+        prev_hash_count = hash_count
 
         # Always specify a new node for each chapter,
         # but do not for any other section if inline is specified.
@@ -69,7 +89,7 @@ def parse_headers_new(src, inline):
         else:
             print("ERROR: Invalid nest level")
 
-    return '\n'.join(lines)
+    return ('\n'.join(lines), title)
 
     
 def parse_headers(src, inline):
@@ -378,12 +398,12 @@ def parse_trailing_backslash(src):
     return '\n'.join(lines)
 
 
-def parse_markdown(src, inline):
+def parse_markdown(src, title, inline, hide_toc):
     out = src
     out = parse_at_characters(out)
     out = parse_trailing_backslash(out)
     out = parse_anchors(out)
-    out = parse_headers_new(out, inline)
+    out, title = parse_headers_new(out, title, inline, hide_toc)
     out = parse_lists(out)
     out = parse_escaped_characters(out)
     out = parse_bold(out)
@@ -391,10 +411,18 @@ def parse_markdown(src, inline):
     out = parse_code(out)
     out = parse_images(out)
     out = parse_links(out)
-    return out
+    return (out, title)
 
 
-def main():
+# Returns a tuple with information parsed from command line arguments with the following structure:
+#     (
+#          file_path
+#          , output_file_path
+#          , title_of_manual
+#          , should_inline_sections
+#          , hide_table_of_contents
+#      )
+def parse_cmd_args():
     argc = len(argv)
     if argc < 2:
         print_usage()
@@ -403,11 +431,12 @@ def main():
     title = ""
     output_file_path = ""
     inline = False
+    hide_toc = False
 
     i = 1
     while i < argc:
         arg = argv[i]
-        if "-h" in arg.lower():
+        if "-h" in arg.lower() and "--h" not in arg.lower():
             print_usage()
         elif arg.startswith("-t"):
             if i + 1 >= argc:
@@ -423,6 +452,8 @@ def main():
             output_file_path = argv[i]
         elif arg.startswith("-i") or arg.startswith("--inline"):
             inline = True
+        elif arg.startswith("--hide-toc"):
+            hide_toc = True
         else:
             if not file_path:
                 file_path = arg
@@ -439,25 +470,30 @@ def main():
     if not file_path.lower().endswith(".md"):
         print("ERROR: The file path given is not a valid markdown file (wrong extension).")
         print(" -> ", file_path)
-        exit(1)
-
-    if not title:
-        title = path.basename(file_path)
+        exit(1)    
 
     # If no output file path is specified on the command line, generate one from the title.
     # Convert to lowercase and replace all spaces with underscores to ensure valid file name.
     if not output_file_path:
         output_file_path = title.lstrip().lower().replace(' ', '_') + ".texi"
-    
+
+    return (file_path, output_file_path, title, inline, hide_toc)
+
+
+def main():
+    file_path, output_file_path, title, inline, hide_toc = parse_cmd_args()
     with open(file_path) as markdown:
+        md = markdown.read()
+        md, title = parse_markdown(md, title, inline, hide_toc)
+        # If no manual title is specified on the command line, generate one from the input file name.
+        if not title:
+            title = path.basename(file_path)
         with open("template.texi") as template:
-            md = markdown.read()
-            md = parse_markdown(md, inline)
-            tex = template.read()
-            tex = tex.replace("$${{TITLE}}$$", title)
-            tex = tex.replace("$${{CONTENTS}}$$", md)
+            texi = template.read()
+            texi = texi.replace("$${{TITLE}}$$", title)
+            texi = texi.replace("$${{CONTENTS}}$$", md)
             with open(output_file_path, 'w') as out:
-                out.write(tex)
+                out.write(texi)
 
 
 if __name__ == "__main__":
