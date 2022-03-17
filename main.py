@@ -3,6 +3,8 @@ from re import finditer, search
 from sys import argv
 
 # TODO:
+# |-- Parse HTML comments and replace them with nothing in final output
+# |   ie. `<!-- ... the comment ... -->`
 # `-- Parse markdown tables into GNU Texinfo multitables
 
 def print_usage():
