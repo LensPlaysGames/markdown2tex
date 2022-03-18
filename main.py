@@ -3,8 +3,13 @@ from re import finditer, search
 from sys import argv
 
 # TODO:
+# |-- Possibly refactor everything to build an intermediate representation
+# |   instead of converting the input to output in-place.
+# |   `-- This would also improve performace drastically, I presume.
+# |-- Mark lines that were made empty as removable from final output.
 # |-- Parse HTML comments and replace them with nothing in final output
 # |   ie. `<!-- ... the comment ... -->`
+# |-- Horizontal Rules (`---`, `___`, and `***`)
 # `-- Parse markdown tables into GNU Texinfo multitables
 
 def print_usage():
