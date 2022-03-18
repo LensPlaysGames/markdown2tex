@@ -262,7 +262,7 @@ def parse_images(src):
             alt_text, link = image.groups()
             # FIXME: Not all image links end with an extension!
             filename, extension = link.rsplit('.', 1)
-            lines[i] = lines[i].replace(image.group(), "@image{" + filename + ",,," + alt_text + ",." + extension + "}")
+            lines[i] = lines[i].replace(image.group(), "@image{" + filename + ",,," + alt_text + "," + extension + "}")
 
     return '\n'.join(lines)
 
