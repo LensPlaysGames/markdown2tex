@@ -163,6 +163,7 @@ def is_bulleted_list_line(line):
         or line.startswith("+ ") \
         or line.startswith("* ")
 
+
 def parse_bulleted_lists(src):
     lines = src.split('\n')
     is_list = False
