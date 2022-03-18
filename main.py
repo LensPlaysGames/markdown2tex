@@ -5,7 +5,9 @@ from sys import argv
 # TODO:
 # |-- Possibly refactor everything to build an intermediate representation
 # |   instead of converting the input to output in-place.
-# |   `-- This would also improve performace drastically, I presume.
+# |   |-- This would improve performace drastically, I presume.
+# |   `-- Convert markdown to a list of tokens, each with a type.
+# |       `-- Use these tokens to generate the contents portion of the output Texinfo file.
 # |-- Mark lines that were made empty as removable from final output.
 # |-- Parse HTML comments and replace them with nothing in final output
 # |   ie. `<!-- ... the comment ... -->`
@@ -324,7 +326,7 @@ def parse_italics(src):
         if len(lines[i]) < 3:
             continue
 
-        italic_text = finditer(r'\*.*\*', lines[i])
+        italic_text = finditer(r'([\*\_])(.*)([\*\_])', lines[i])
         for it in italic_text:
             lines[i] = lines[i].replace(it.group(), "@emph{" + it.group()[1:-1] + "}")
 
