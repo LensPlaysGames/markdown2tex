@@ -153,6 +153,11 @@ def parse_anchors(src):
     return '\n'.join(lines)
 
 
+def is_bulleted_list_line(line):
+    return line.startswith("- ") \
+        or line.startswith("+ ") \
+        or line.startswith("* ")
+
 def parse_bulleted_lists(src):
     lines = src.split('\n')
     is_list = False
@@ -165,7 +170,7 @@ def parse_bulleted_lists(src):
 
         # Detect all of the entries within a list.
         if is_list:
-            if lines[i].startswith("- ") or lines[i].startswith("* "):
+            if is_bulleted_list_line(lines[i]):
                 lines[i] = "@item\n" + lines[i][2:]
             else:
                 lines[i] = "@end itemize\n" + lines[i]
@@ -173,7 +178,7 @@ def parse_bulleted_lists(src):
             continue
 
         # Detect the start of a list.
-        if lines[i].startswith("- "):
+        if is_bulleted_list_line(lines[i]):
             lines[i] = "@itemize\n@item\n" + lines[i][2:]
             is_list = True
 
@@ -255,6 +260,7 @@ def parse_images(src):
         images = finditer(r'!\[(.*?)\] *\((.*?)\)', lines[i])
         for image in images:
             alt_text, link = image.groups()
+            # FIXME: Not all image links end with an extension!
             filename, extension = link.rsplit('.', 1)
             lines[i] = lines[i].replace(image.group(), "@image{" + filename + ",,," + alt_text + ",." + extension + "}")
 
