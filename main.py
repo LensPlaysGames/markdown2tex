@@ -474,10 +474,7 @@ def parse_cmd_args():
         print(" -> ", file_path)
         exit(1)    
 
-    # If no output file path is specified on the command line, generate one from the title.
-    # Convert to lowercase and replace all spaces with underscores to ensure valid file name.
-    if not output_file_path:
-        output_file_path = title.lstrip().lower().replace(' ', '_') + ".texi"
+
 
     return (file_path, output_file_path, title, inline, hide_toc)
 
@@ -487,9 +484,19 @@ def main():
     with open(file_path) as markdown:
         md = markdown.read()
         md, title = parse_markdown(md, title, inline, hide_toc)
-        # If no manual title is specified on the command line, generate one from the input file name.
+
+        # If no manual title is specified on the command
+        # line, generate one from the input file name.
         if not title:
             title = path.basename(file_path)
+
+        # If no output file path is specified on the command
+        # line, generate one from the title.
+        # Convert to lowercase and replace all spaces with
+        # underscores to ensure valid file name.
+        if not output_file_path:
+            output_file_path = title.lstrip().lower().replace(' ', '_') + ".texi"
+
         with open("template.texi") as template:
             texi = template.read()
             texi = texi.replace("$${{TITLE}}$$", title)
