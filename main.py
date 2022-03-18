@@ -35,6 +35,9 @@ def parse_headers_new(src, title, inline, hide_toc):
     prev_hash_count = 0
     nest_level = 0
     for i in range(len(lines)):
+        if len(lines[i]) < 2:
+            continue
+
         if i == 0 and lines[0][0] == '#' and lines[0][1] == ' ':
             title = lines[0][2:]
             lines[0] = ""
@@ -44,9 +47,6 @@ def parse_headers_new(src, title, inline, hide_toc):
                          or "table-of-contents" in lines[i].lower()):
             lines[i] = ""
             within_toc = True
-            continue
-
-        if len(lines[i]) < 2:
             continue
 
         hash_count = 0
