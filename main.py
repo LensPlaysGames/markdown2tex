@@ -309,7 +309,7 @@ def parse_bold(src):
         if len(lines[i]) < 5:
             continue
 
-        bold_text = finditer(r'\*\*.*\*\*', lines[i])
+        bold_text = finditer(r'([\*\_])\1(.*)([\*\_])\1', lines[i])
         for it in bold_text:
             lines[i] = lines[i].replace(it.group(), "@strong{" + it.group()[2:-2] + "}")
 
