@@ -411,10 +411,25 @@ def parse_trailing_backslash(src):
     return '\n'.join(lines)
 
 
+def parse_html_comments(src):
+    lines = src.split('\n')
+    for i in range(len(lines)):
+        # Minimum length: "<!---->"
+        if len(lines[i]) < 7:
+            continue
+
+        comments_in_line = finditer(r'<!--.*-->', lines[i])
+        for comment in comments_in_line:
+            lines[i] = lines[i].replace(comment.group(), "")
+        
+    return '\n'.join(lines)
+
+
 def parse_markdown(src, title, inline, hide_toc):
     out = src
     out = parse_at_characters(out)
     out = parse_trailing_backslash(out)
+    out = parse_html_comments(out)
     out = parse_anchors(out)
     out, title = parse_headers_new(out, title, inline, hide_toc)
     out = parse_lists(out)
